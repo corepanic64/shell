@@ -21,7 +21,7 @@ fn enter_shell() {
         match eval_command(&command) {
             Action::Terminate => break,
             Action::NoOp => println!(""),
-            Action::Print(str) => println!("{str}"),
+            Action::Print(str) => println!("{}", str.trim()),
             Action::Type(str) => print_builtin_commands(str),
         }
     }

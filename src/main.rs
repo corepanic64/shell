@@ -1,5 +1,7 @@
+use pathsearch::find_executable_in_path;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::{env, path::Path};
 
 enum Action {
     Terminate,
@@ -32,7 +34,15 @@ fn print_builtin_commands(string: String) {
         "echo" => println!("echo is a shell builtin"),
         "exit" => println!("exit is a shell builtin"),
         "type" => println!("type is a shell builtin"),
-        x => println!("{x}: not found"),
+        x => search_files(x),
+    }
+}
+
+fn search_files(x: &str) {
+    if let Some(path) = find_executable_in_path(&x) {
+        println!("{} is {}", x, path.to_str().unwrap().to_string())
+    } else {
+        println!("{}: command not found", x)
     }
 }
 

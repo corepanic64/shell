@@ -42,7 +42,7 @@ fn search_files(x: &str) {
     if let Some(path) = find_executable_in_path(&x) {
         println!("{} is {}", x, path.to_str().unwrap().to_string())
     } else {
-        println!("{}: command not found", x)
+        println!("{}: not found", x)
     }
 }
 

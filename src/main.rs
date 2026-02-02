@@ -7,6 +7,7 @@ enum Action {
     Terminate,
     NoOp,
     Print(String),
+    Echo(String),
     Type(String),
 }
 
@@ -24,6 +25,7 @@ fn enter_shell() {
             Action::Terminate => break,
             Action::NoOp => println!(""),
             Action::Print(str) => exec_something(str),
+            Action::Echo(str) => println!("{}", str),
             Action::Type(str) => print_builtin_commands(str),
         }
     }
@@ -33,7 +35,17 @@ fn exec_something(args: String) {
     let parts: Vec<&str> = args.split_whitespace().collect();
     if let Some(&program) = parts.get(0) {
         let args = &parts[1..];
-        let err = Command::new(program).args(args).exec();
+        if let Some(path) = find_executable_in_path(&program) {
+            Command::new(path)
+                .arg0(program)
+                .args(args)
+                .spawn()
+                .unwrap()
+                .wait()
+                .unwrap();
+        } else {
+            println!("{}: not found", program)
+        }
     } else {
         print!("Command not found")
     }
@@ -58,6 +70,7 @@ fn search_files(x: &str) {
 }
 
 fn eval_command(input: &str) -> Action {
+    let input = input.trim();
     let mut cmd = input.split(" ");
 
     let binary = if let Some(bin) = cmd.next() {
@@ -68,7 +81,7 @@ fn eval_command(input: &str) -> Action {
 
     match binary.trim() {
         "exit" => Action::Terminate,
-        "echo" => Action::Print(cmd.collect::<Vec<&str>>().join(" ")),
+        "echo" => Action::Echo(cmd.collect::<Vec<&str>>().join(" ")),
         "type" => Action::Type(cmd.collect::<Vec<&str>>().join(" ")),
         _ => Action::Print(input.to_string()),
     }

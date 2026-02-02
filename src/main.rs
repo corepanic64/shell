@@ -1,7 +1,7 @@
 use pathsearch::find_executable_in_path;
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{env, path::Path};
+use std::{os::unix::process::CommandExt, process::Command};
 
 enum Action {
     Terminate,
@@ -23,10 +23,21 @@ fn enter_shell() {
         match eval_command(&command) {
             Action::Terminate => break,
             Action::NoOp => println!(""),
-            Action::Print(str) => println!("{}", str.trim()),
+            Action::Print(str) => exec_something(str),
             Action::Type(str) => print_builtin_commands(str),
         }
     }
+}
+
+fn exec_something(args: String) {
+    let parts: Vec<&str> = args.split_whitespace().collect();
+    if let Some(&program) = parts.get(0) {
+        let args = &parts[1..];
+        let err = Command::new(program).args(args).exec();
+    } else {
+        print!("Command not found")
+    }
+    ()
 }
 
 fn print_builtin_commands(string: String) {
@@ -59,6 +70,6 @@ fn eval_command(input: &str) -> Action {
         "exit" => Action::Terminate,
         "echo" => Action::Print(cmd.collect::<Vec<&str>>().join(" ")),
         "type" => Action::Type(cmd.collect::<Vec<&str>>().join(" ")),
-        _ => Action::Print(format!("{}: command not found", binary.trim())),
+        _ => Action::Print(input.to_string()),
     }
 }

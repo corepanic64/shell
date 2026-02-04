@@ -19,13 +19,13 @@ pub fn custom_command(command_name: String, args: Vec<String>) {
     }
 }
 pub fn command_not_found(invalid_command: String) {
-    println!("{invalid_command} not found")
+    println!("{invalid_command} not found [command_not_found]")
 }
 
 pub fn type_command(command_name: String, command_type: CommandType) {
     match command_type {
         CommandType::Builtin => println!("{command_name} is builtin type"),
         CommandType::Executable { path } => println!("{command_name} is {path}"),
-        _ => println!("{command_name} not found"),
+        CommandType::Invalid => println!("{command_name} not found [type]"),
     }
 }

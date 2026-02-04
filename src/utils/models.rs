@@ -36,9 +36,18 @@ impl Command {
                         command_type: CommandType::Builtin,
                     };
                 }
-                return Self::CommandNotFound {
-                    invalid_command: remaining_args.join("").to_string(),
-                };
+                if let Some(path) = find_executable_in_path(&cmd) {
+                    return Self::TypeCommand {
+                        command_name: remaining_args.join(""),
+                        command_type: CommandType::Executable {
+                            path: path.to_string_lossy().to_string(),
+                        },
+                    };
+                } else {
+                    return Self::CommandNotFound {
+                        invalid_command: cmd.to_string(),
+                    };
+                }
             }
             _ => {
                 if let Some(path) = find_executable_in_path(&cmd) {

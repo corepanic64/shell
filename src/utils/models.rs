@@ -36,7 +36,7 @@ impl Command {
                         command_type: CommandType::Builtin,
                     };
                 }
-                if let Some(path) = find_executable_in_path(&cmd) {
+                if let Some(path) = find_executable_in_path(&remaining_args.join("")) {
                     return Self::TypeCommand {
                         command_name: remaining_args.join(""),
                         command_type: CommandType::Executable {
@@ -45,7 +45,7 @@ impl Command {
                     };
                 } else {
                     return Self::CommandNotFound {
-                        invalid_command: cmd.to_string(),
+                        invalid_command: remaining_args.join(""),
                     };
                 }
             }

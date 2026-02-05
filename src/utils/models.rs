@@ -3,7 +3,7 @@ use std::env;
 
 impl Command {
     pub fn from_input(input: String) -> Self {
-        const BUILTINS: [&str; 3] = ["exit", "echo", "type"];
+        const BUILTINS: [&str; 4] = ["exit", "echo", "type", "pwd"];
         let args = shlex::split(input.trim()).unwrap();
         if args.is_empty() {
             return Self::EmptyCommand;

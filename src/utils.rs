@@ -12,6 +12,12 @@ pub fn command_pwd(working_dir: String) {
     println!("{working_dir}")
 }
 
+pub fn cd_command(path: String, is_error: bool) {
+    if is_error {
+        println!("cd: {}: No such file or directory", path)
+    }
+}
+
 pub fn echo_command(display_string: String) {
     println!("{display_string}")
 }

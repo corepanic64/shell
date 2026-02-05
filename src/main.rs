@@ -22,6 +22,7 @@ fn main() {
                 command_name,
                 command_type,
             } => type_command(command_name, command_type),
+            Command::CdCommand { path, is_error } => cd_command(path, is_error),
         }
     }
 }

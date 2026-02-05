@@ -1,5 +1,5 @@
 use pathsearch::find_executable_in_path;
-use std::env;
+use std::{env, path::Path};
 
 impl Command {
     pub fn from_input(input: String) -> Self {
@@ -65,6 +65,23 @@ impl Command {
                     }
                 }
             }
+            "cd" => {
+                let path = remaining_args.join("");
+                let path_exists = Path::new(&path).exists();
+                let path_clone = path.clone();
+                if path_exists {
+                    env::set_current_dir(path);
+                    Self::CdCommand {
+                        path: path_clone,
+                        is_error: false,
+                    }
+                } else {
+                    Self::CdCommand {
+                        path: path_clone,
+                        is_error: true,
+                    }
+                }
+            }
             _ => {
                 if let Some(path) = find_executable_in_path(&cmd) {
                     return Command::CustomCommand {
@@ -94,6 +111,10 @@ pub enum Command {
     TypeCommand {
         command_name: String,
         command_type: CommandType,
+    },
+    CdCommand {
+        path: String,
+        is_error: bool,
     },
     EmptyCommand,
     ExitCommand {

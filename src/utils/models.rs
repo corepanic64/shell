@@ -1,4 +1,5 @@
 use pathsearch::find_executable_in_path;
+use std::env;
 
 impl Command {
     pub fn from_input(input: String) -> Self {
@@ -49,6 +50,21 @@ impl Command {
                     };
                 }
             }
+            "pwd" => {
+                let working_dir = env::current_dir();
+                match working_dir {
+                    Ok(dir) => {
+                        return Self::PwdCommnad {
+                            working_dir: dir.to_string_lossy().to_string(),
+                        };
+                    }
+                    Err(e) => {
+                        return Self::CommandNotFound {
+                            invalid_command: e.to_string(),
+                        };
+                    }
+                }
+            }
             _ => {
                 if let Some(path) = find_executable_in_path(&cmd) {
                     return Command::CustomCommand {
@@ -71,6 +87,9 @@ pub enum Command {
     },
     CommandNotFound {
         invalid_command: String,
+    },
+    PwdCommnad {
+        working_dir: String,
     },
     TypeCommand {
         command_name: String,

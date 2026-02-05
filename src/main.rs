@@ -17,6 +17,7 @@ fn main() {
             Command::EmptyCommand => {}
             Command::CustomCommand { command_name, args } => custom_command(command_name, args),
             Command::CommandNotFound { invalid_command } => command_not_found(invalid_command),
+            Command::PwdCommnad { working_dir } => command_pwd(working_dir),
             Command::TypeCommand {
                 command_name,
                 command_type,

@@ -8,6 +8,10 @@ pub fn exit_command(code: i32) {
 
 pub fn invalid_command(error_text: String) {}
 
+pub fn command_pwd(working_dir: String) {
+    println!("{working_dir}")
+}
+
 pub fn echo_command(display_string: String) {
     println!("{display_string}")
 }

@@ -69,6 +69,14 @@ impl Command {
                 let path = remaining_args.join("");
                 let path_exists = Path::new(&path).exists();
                 let path_clone = path.clone();
+                if path == "~" {
+                    let home_path = env::var("HOME");
+                    match home_path {
+                        Ok(path) => env::set_current_dir(path),
+                        Err(_) => panic!("HOME variable not found"),
+                    };
+                    return Self::EmptyCommand;
+                }
                 if path_exists {
                     env::set_current_dir(path);
                     Self::CdCommand {

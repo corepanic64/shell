@@ -3,7 +3,7 @@ use std::{env, path::Path};
 
 impl Command {
     pub fn from_input(input: String) -> Self {
-        const BUILTINS: [&str; 5] = ["exit", "echo", "type", "pwd", "cd"];
+        const BUILTINS: [&str; 6] = ["exit", "echo", "type", "pwd", "cd", "history"];
         let args = shlex::split(input.trim()).unwrap();
         if args.is_empty() {
             return Self::EmptyCommand;

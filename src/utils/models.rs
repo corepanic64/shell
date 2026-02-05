@@ -70,11 +70,10 @@ impl Command {
                 let path_exists = Path::new(&path).exists();
                 let path_clone = path.clone();
                 if path == "~" {
-                    let home_path = env::var("HOME");
-                    match home_path {
-                        Ok(path) => env::set_current_dir(path),
-                        Err(_) => panic!("HOME variable not found"),
-                    };
+                    let home_path = std::env::home_dir();
+                    if let Some(home) = home_path {
+                        env::set_current_dir(home);
+                    }
                     return Self::EmptyCommand;
                 }
                 if path_exists {

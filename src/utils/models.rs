@@ -100,7 +100,12 @@ impl Command {
                 let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
                 let contents = fs::read_to_string(pathy).unwrap();
                 contents.split("*").enumerate().for_each(|(i, f)| {
-                    println!("{:>5}  {}", i, f);
+                    // if f.trim(). {
+                    //     println!("{:>5}  {}", i, f);
+                    // }
+                    if f.trim().len() > 0 {
+                        println!("{:>5} {}", i, f)
+                    }
                 });
                 return Self::HistoryCommand;
             }

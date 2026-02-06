@@ -1,3 +1,5 @@
+use std::env;
+use std::fs::File;
 use std::io::{self, Write};
 mod utils;
 use utils::models::Command;
@@ -5,11 +7,15 @@ use utils::*;
 
 fn main() {
     loop {
+        // let path = env::current_dir().unwrap();
+        // let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
+        // let mut file = File::create(pathy).expect("");
+        // file.write_all(b"");
         let mut input = String::new();
         print!("$ ");
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut input).expect("Failed to read");
-        let command = Command::from_input(input);
+        let command = Command::from_input(&input);
         match command {
             Command::ExitCommand { exit_code } => exit_command(exit_code),
             Command::EchoCommand { display_string } => echo_command(display_string),
@@ -23,6 +29,7 @@ fn main() {
                 command_type,
             } => type_command(command_name, command_type),
             Command::CdCommand { path, is_error } => cd_command(path, is_error),
+            Command::HistoryCommand => history_command(),
         }
     }
 }

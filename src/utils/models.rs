@@ -1,13 +1,19 @@
 use pathsearch::find_executable_in_path;
-use std::{env, path::Path};
+use std::{
+    env,
+    fs::{self, File, OpenOptions},
+    io::Write,
+    path::Path,
+};
 
 impl Command {
-    pub fn from_input(input: String) -> Self {
+    pub fn from_input(input: &String) -> Self {
         const BUILTINS: [&str; 6] = ["exit", "echo", "type", "pwd", "cd", "history"];
         let args = shlex::split(input.trim()).unwrap();
         if args.is_empty() {
             return Self::EmptyCommand;
         }
+        write_to_history(input);
         let cmd = &args[0];
         let remaining_args = &args[1..];
         match cmd.as_str() {
@@ -89,6 +95,15 @@ impl Command {
                     }
                 }
             }
+            "history" => {
+                let path = env::current_dir().unwrap();
+                let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
+                let contents = fs::read_to_string(pathy).unwrap();
+                contents.split("*").enumerate().for_each(|(i, f)| {
+                    println!("{:>5}  {}", i, f);
+                });
+                return Self::HistoryCommand;
+            }
             _ => {
                 if let Some(path) = find_executable_in_path(&cmd) {
                     return Command::CustomCommand {
@@ -115,6 +130,7 @@ pub enum Command {
     PwdCommnad {
         working_dir: String,
     },
+    HistoryCommand,
     TypeCommand {
         command_name: String,
         command_type: CommandType,
@@ -140,4 +156,16 @@ pub enum CommandType {
     Builtin,
     Invalid,
     Executable { path: String },
+}
+
+fn write_to_history(word: &String) -> std::io::Result<()> {
+    let path = env::current_dir().unwrap();
+    let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
+    let formated_word = format!("{}*", word);
+    let mut output = OpenOptions::new()
+        .append(true)
+        .open(pathy)
+        .expect("FAILED TO OPEN HISTORY.TXT");
+    output.write_all(formated_word.as_bytes());
+    Ok(())
 }

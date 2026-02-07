@@ -13,7 +13,7 @@ impl Command {
         if args.is_empty() {
             return Self::EmptyCommand;
         }
-        write_to_history(input);
+        write_to_history(input).expect("WELL THAT WAS UNEXPECTED");
         let cmd = &args[0];
         let remaining_args = &args[1..];
         match cmd.as_str() {
@@ -104,7 +104,7 @@ impl Command {
                     //     println!("{:>5}  {}", i, f);
                     // }
                     if f.trim().len() > 0 {
-                        println!("{:>5} {}", i, f)
+                        println!("{:>5} {}", i + 1, f.trim())
                     }
                 });
                 return Self::HistoryCommand;
@@ -167,10 +167,17 @@ fn write_to_history(word: &String) -> std::io::Result<()> {
     let path = env::current_dir().unwrap();
     let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
     let formated_word = format!("{}*", word);
-    let mut output = OpenOptions::new()
-        .append(true)
-        .open(pathy)
-        .expect("FAILED TO OPEN HISTORY.TXT");
-    output.write_all(formated_word.as_bytes());
+    if word.trim() == "exit" {
+        let path = env::current_dir().unwrap();
+        let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
+        let mut file = File::create(pathy).expect("");
+        file.write_all(b"");
+    } else {
+        // let mut output = OpenOptions::new()
+        //     .append(true)
+        //     .open(pathy)
+        //     .expect("FAILED TO OPEN HISTORY.TXT");
+        // output.write_all(formated_word.as_bytes());
+    }
     Ok(())
 }

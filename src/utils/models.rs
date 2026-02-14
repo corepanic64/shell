@@ -104,12 +104,12 @@ impl Command {
                 let pathy = path.join("src/history.txt");
                 let contents = fs::read_to_string(pathy).unwrap();
                 if !history_count.is_empty() {
-                    let h = history_count.get(0).unwrap().parse::<i32>().unwrap();
-                    let mut c = 0;
+                    let h = history_count.get(0).unwrap().parse::<usize>().unwrap();
                     contents.split("*").enumerate().for_each(|(i, f)| {
-                        if c != h {
-                            println!("{:>5} {}", i + 1, f.trim());
-                            c += 1;
+                        if f.trim().len() > 0 {
+                            if h < i + 1 {
+                                println!("{:>5} {}", i + 1, f.trim())
+                            }
                         }
                     })
                 } else {

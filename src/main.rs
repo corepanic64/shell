@@ -6,10 +6,15 @@ mod utils;
 use utils::models::Command;
 use utils::*;
 
+use crate::utils::models::clean_history;
+
 pub static INITIAL_DIR: OnceLock<PathBuf> = OnceLock::new();
 
 fn main() {
     INITIAL_DIR.set(env::current_dir().unwrap()).unwrap();
+    let path = INITIAL_DIR.get().unwrap();
+    let pathy = path.join("src/history.txt");
+    clean_history(pathy);
     loop {
         let mut input = String::new();
         print!("$ ");

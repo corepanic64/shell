@@ -125,7 +125,6 @@ impl Command {
                         }
                     })
                 }
-                clean_history(l);
                 return Self::HistoryCommand;
             }
             _ => {
@@ -201,7 +200,7 @@ fn write_to_history(word: &String) -> std::io::Result<()> {
     Ok(())
 }
 
-fn clean_history(pathy: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+pub fn clean_history(pathy: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut file = File::create(pathy)?;
     file.write_all(b"")?;
     Ok(())

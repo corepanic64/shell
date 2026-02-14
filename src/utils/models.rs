@@ -102,6 +102,7 @@ impl Command {
                 let history_count = remaining_args;
                 let path = INITIAL_DIR.get().unwrap();
                 let pathy = path.join("src/history.txt");
+                let l = pathy.clone();
                 let contents = fs::read_to_string(pathy).unwrap();
                 if !history_count.is_empty() {
                     let h = history_count.get(0).unwrap().parse::<usize>().unwrap();
@@ -124,6 +125,7 @@ impl Command {
                         }
                     })
                 }
+                clean_history(l);
                 return Self::HistoryCommand;
             }
             _ => {
@@ -184,17 +186,23 @@ fn write_to_history(word: &String) -> std::io::Result<()> {
     let path = INITIAL_DIR.get().unwrap();
     let pathy = path.join("src/history.txt");
     let formated_word = format!("{}*", word);
-    if word.trim() == "exit" {
-        let path = INITIAL_DIR.get().unwrap();
-        let pathy = path.join("src/history.txt");
-        let mut file = File::create(pathy).expect("");
-        file.write_all(b"")?;
-    } else {
-        let mut output = OpenOptions::new()
-            .append(true)
-            .open(pathy)
-            .expect("FAILED TO OPEN HISTORY.TXT");
-        output.write_all(formated_word.as_bytes())?;
+    match word.trim() {
+        "exit" => {
+            clean_history(pathy);
+        }
+        _ => {
+            let mut output = OpenOptions::new()
+                .append(true)
+                .open(pathy)
+                .expect("FAILED TO OPEN HISTORY.TXT");
+            output.write_all(formated_word.as_bytes())?;
+        }
     }
+    Ok(())
+}
+
+fn clean_history(pathy: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    let mut file = File::create(pathy)?;
+    file.write_all(b"")?;
     Ok(())
 }

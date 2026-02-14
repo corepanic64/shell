@@ -105,13 +105,18 @@ impl Command {
                 let contents = fs::read_to_string(pathy).unwrap();
                 if !history_count.is_empty() {
                     let h = history_count.get(0).unwrap().parse::<usize>().unwrap();
-                    contents.split("*").enumerate().for_each(|(i, f)| {
-                        if f.trim().len() > 0 {
-                            if h < i + 1 {
-                                println!("{:>5} {}", i + 1, f.trim())
-                            }
+                    let entries: Vec<_> = contents
+                        .split("*")
+                        .enumerate()
+                        .filter(|(_, b)| b.trim().len() > 0)
+                        .collect();
+                    let l = entries.len();
+                    let start = l - h;
+                    for (idx, item) in entries {
+                        if idx + 1 > start {
+                            println!("{:>5} {}", idx + 1, item.trim())
                         }
-                    })
+                    }
                 } else {
                     contents.split("*").enumerate().for_each(|(i, f)| {
                         if f.trim().len() > 0 {

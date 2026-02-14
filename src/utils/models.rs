@@ -99,14 +99,26 @@ impl Command {
                 }
             }
             "history" => {
+                let history_count = remaining_args;
                 let path = INITIAL_DIR.get().unwrap();
                 let pathy = path.join("src/history.txt");
                 let contents = fs::read_to_string(pathy).unwrap();
-                contents.split("*").enumerate().for_each(|(i, f)| {
-                    if f.trim().len() > 0 {
-                        println!("{:>5} {}", i + 1, f.trim())
-                    }
-                });
+                if !history_count.is_empty() {
+                    let h = history_count.get(0).unwrap().parse::<i32>().unwrap();
+                    let mut c = 0;
+                    contents.split("*").enumerate().for_each(|(i, f)| {
+                        if c != h {
+                            println!("{:>5} {}", i + 1, f.trim());
+                            c += 1;
+                        }
+                    })
+                } else {
+                    contents.split("*").enumerate().for_each(|(i, f)| {
+                        if f.trim().len() > 0 {
+                            println!("{:>5} {}", i + 1, f.trim())
+                        }
+                    })
+                }
                 return Self::HistoryCommand;
             }
             _ => {

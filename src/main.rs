@@ -1,16 +1,16 @@
 use std::env;
-use std::fs::File;
 use std::io::{self, Write};
+use std::path::PathBuf;
+use std::sync::OnceLock;
 mod utils;
 use utils::models::Command;
 use utils::*;
 
+pub static INITIAL_DIR: OnceLock<PathBuf> = OnceLock::new();
+
 fn main() {
+    INITIAL_DIR.set(env::current_dir().unwrap()).unwrap();
     loop {
-        // let path = env::current_dir().unwrap();
-        // let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
-        // let mut file = File::create(pathy).expect("");
-        // file.write_all(b"");
         let mut input = String::new();
         print!("$ ");
         io::stdout().flush().unwrap();

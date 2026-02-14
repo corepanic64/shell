@@ -3,8 +3,11 @@ use std::{
     env,
     fs::{self, File, OpenOptions},
     io::Write,
-    path::Path,
+    path::{Path, PathBuf},
+    sync::OnceLock,
 };
+
+use crate::INITIAL_DIR;
 
 impl Command {
     pub fn from_input(input: &String) -> Self {
@@ -96,13 +99,10 @@ impl Command {
                 }
             }
             "history" => {
-                let path = env::current_dir().unwrap();
-                let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
+                let path = INITIAL_DIR.get().unwrap();
+                let pathy = path.join("src/history.txt");
                 let contents = fs::read_to_string(pathy).unwrap();
                 contents.split("*").enumerate().for_each(|(i, f)| {
-                    // if f.trim(). {
-                    //     println!("{:>5}  {}", i, f);
-                    // }
                     if f.trim().len() > 0 {
                         println!("{:>5} {}", i + 1, f.trim())
                     }
@@ -164,20 +164,20 @@ pub enum CommandType {
 }
 
 fn write_to_history(word: &String) -> std::io::Result<()> {
-    let path = env::current_dir().unwrap();
-    let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
+    let path = INITIAL_DIR.get().unwrap();
+    let pathy = path.join("src/history.txt");
     let formated_word = format!("{}*", word);
     if word.trim() == "exit" {
-        let path = env::current_dir().unwrap();
-        let pathy = format!("{}/src/history.txt", path.to_string_lossy().to_string());
+        let path = INITIAL_DIR.get().unwrap();
+        let pathy = path.join("src/history.txt");
         let mut file = File::create(pathy).expect("");
-        file.write_all(b"");
+        file.write_all(b"")?;
     } else {
-        // let mut output = OpenOptions::new()
-        //     .append(true)
-        //     .open(pathy)
-        //     .expect("FAILED TO OPEN HISTORY.TXT");
-        // output.write_all(formated_word.as_bytes());
+        let mut output = OpenOptions::new()
+            .append(true)
+            .open(pathy)
+            .expect("FAILED TO OPEN HISTORY.TXT");
+        output.write_all(formated_word.as_bytes())?;
     }
     Ok(())
 }

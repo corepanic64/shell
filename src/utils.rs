@@ -18,10 +18,6 @@ pub fn cd_command(path: String, is_error: bool) {
     }
 }
 
-pub fn history_command() {
-    // println!("HISTORY")
-}
-
 pub fn echo_command(display_string: String) {
     println!("{display_string}")
 }

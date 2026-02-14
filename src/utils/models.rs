@@ -4,10 +4,47 @@ use std::{
     fs::{self, File, OpenOptions},
     io::Write,
     path::{Path, PathBuf},
-    sync::OnceLock,
 };
 
 use crate::INITIAL_DIR;
+
+pub enum Command {
+    EchoCommand {
+        display_string: String,
+    },
+    CommandNotFound {
+        invalid_command: String,
+    },
+    PwdCommnad {
+        working_dir: String,
+    },
+    HistoryCommand,
+    TypeCommand {
+        command_name: String,
+        command_type: CommandType,
+    },
+    CdCommand {
+        path: String,
+        is_error: bool,
+    },
+    EmptyCommand,
+    ExitCommand {
+        exit_code: i32,
+    },
+    InvalidCommand {
+        error_text: String,
+    },
+    CustomCommand {
+        command_name: String,
+        args: Vec<String>,
+    },
+}
+
+pub enum CommandType {
+    Builtin,
+    Invalid,
+    Executable { path: String },
+}
 
 impl Command {
     pub fn from_input(input: &String) -> Self {
@@ -16,7 +53,7 @@ impl Command {
         if args.is_empty() {
             return Self::EmptyCommand;
         }
-        write_to_history(input).expect("WELL THAT WAS UNEXPECTED");
+        write_to_history(input).expect("could not write to history");
         let cmd = &args[0];
         let remaining_args = &args[1..];
         match cmd.as_str() {
@@ -100,22 +137,21 @@ impl Command {
             }
             "history" => {
                 let history_count = remaining_args;
-                let path = INITIAL_DIR.get().unwrap();
-                let pathy = path.join("src/history.txt");
-                let l = pathy.clone();
-                let contents = fs::read_to_string(pathy).unwrap();
+                let path_buf = INITIAL_DIR.get().unwrap();
+                let path = path_buf.join("src/history.txt");
+                let contents = fs::read_to_string(path).unwrap();
                 if !history_count.is_empty() {
-                    let h = history_count.get(0).unwrap().parse::<usize>().unwrap();
+                    let history_count = history_count.get(0).unwrap().parse::<usize>().unwrap();
                     let entries: Vec<_> = contents
                         .split("*")
                         .enumerate()
                         .filter(|(_, b)| b.trim().len() > 0)
                         .collect();
-                    let l = entries.len();
-                    let start = l - h;
-                    for (idx, item) in entries {
-                        if idx + 1 > start {
-                            println!("{:>5} {}", idx + 1, item.trim())
+                    let length_of_history = entries.len();
+                    let start = length_of_history - history_count;
+                    for (i, f) in entries {
+                        if i + 1 > start {
+                            println!("{:>5} {}", i + 1, f.trim())
                         }
                     }
                 } else {
@@ -128,7 +164,7 @@ impl Command {
                 return Self::HistoryCommand;
             }
             _ => {
-                if let Some(path) = find_executable_in_path(&cmd) {
+                if let Some(_) = find_executable_in_path(&cmd) {
                     return Command::CustomCommand {
                         command_name: cmd.to_string(),
                         args: remaining_args.to_vec(),
@@ -143,65 +179,27 @@ impl Command {
     }
 }
 
-pub enum Command {
-    EchoCommand {
-        display_string: String,
-    },
-    CommandNotFound {
-        invalid_command: String,
-    },
-    PwdCommnad {
-        working_dir: String,
-    },
-    HistoryCommand,
-    TypeCommand {
-        command_name: String,
-        command_type: CommandType,
-    },
-    CdCommand {
-        path: String,
-        is_error: bool,
-    },
-    EmptyCommand,
-    ExitCommand {
-        exit_code: i32,
-    },
-    InvalidCommand {
-        error_text: String,
-    },
-    CustomCommand {
-        command_name: String,
-        args: Vec<String>,
-    },
-}
-
-pub enum CommandType {
-    Builtin,
-    Invalid,
-    Executable { path: String },
-}
-
 fn write_to_history(word: &String) -> std::io::Result<()> {
-    let path = INITIAL_DIR.get().unwrap();
-    let pathy = path.join("src/history.txt");
+    let path_buf = INITIAL_DIR.get().unwrap();
+    let path = path_buf.join("src/history.txt");
     let formated_word = format!("{}*", word);
     match word.trim() {
         "exit" => {
-            clean_history(pathy);
+            clean_history(path).expect("could not clean history");
         }
         _ => {
             let mut output = OpenOptions::new()
                 .append(true)
-                .open(pathy)
-                .expect("FAILED TO OPEN HISTORY.TXT");
+                .open(path)
+                .expect("faild to open history.txt");
             output.write_all(formated_word.as_bytes())?;
         }
     }
     Ok(())
 }
 
-pub fn clean_history(pathy: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    let mut file = File::create(pathy)?;
+pub fn clean_history(path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    let mut file = File::create(path)?;
     file.write_all(b"")?;
     Ok(())
 }

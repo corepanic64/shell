@@ -12,9 +12,10 @@ pub static INITIAL_DIR: OnceLock<PathBuf> = OnceLock::new();
 
 fn main() {
     INITIAL_DIR.set(env::current_dir().unwrap()).unwrap();
-    let path = INITIAL_DIR.get().unwrap();
-    let pathy = path.join("src/history.txt");
-    clean_history(pathy);
+    let path_buf = INITIAL_DIR.get().unwrap();
+    let path = path_buf.join("src/history.txt");
+    clean_history(path).expect("could not clean history");
+
     loop {
         let mut input = String::new();
         print!("$ ");
@@ -34,7 +35,7 @@ fn main() {
                 command_type,
             } => type_command(command_name, command_type),
             Command::CdCommand { path, is_error } => cd_command(path, is_error),
-            Command::HistoryCommand => history_command(),
+            Command::HistoryCommand => {}
         }
     }
 }
